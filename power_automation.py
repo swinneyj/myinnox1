@@ -180,6 +180,7 @@ def _build_combined_status(base_status):
 
     res = dict(base_status) if base_status.get("success") else {
         "success": False,
+        "configured": base_status.get("configured", True),
         "error": _state["status_error"] or "Could not connect to plug",
         "connected": False
     }

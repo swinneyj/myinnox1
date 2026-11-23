@@ -131,11 +131,29 @@
     if (isToggling) return;
     try {
       const res = await fetch(apiBase + "/power/status");
+      if (!res.ok) {
+        // If endpoint does not exist (e.g. Vercel deployment), cleanly hide widget
+        const widget = document.getElementById("machine-power-widget");
+        if (widget) widget.style.display = "none";
+        if (pollTimer) clearInterval(pollTimer);
+        return;
+      }
       const data = await res.json();
+      if (data && data.configured === false) {
+        // If plug is unconfigured, hide widget and pause polling
+        const widget = document.getElementById("machine-power-widget");
+        if (widget) widget.style.display = "none";
+        if (pollTimer) clearInterval(pollTimer);
+        return;
+      }
+      const widget = document.getElementById("machine-power-widget");
+      if (widget && widget.style.display === "none") widget.style.display = "";
       updateUI(data);
       return data;
     } catch (e) {
-      updateUI({ success: false, error: e.message });
+      const widget = document.getElementById("machine-power-widget");
+      if (widget) widget.style.display = "none";
+      if (pollTimer) clearInterval(pollTimer);
     }
   }
 

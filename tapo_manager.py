@@ -143,8 +143,10 @@ async def set_power_async(turn_on: bool):
                 await dev.protocol.close()
             except Exception:
                 pass
+        is_unconfigured = "not found" in str(e).lower()
         return {
             "success": False,
+            "configured": not is_unconfigured,
             "error": str(e)
         }
 
@@ -167,8 +169,10 @@ async def toggle_power_async():
                 await dev.protocol.close()
             except Exception:
                 pass
+        is_unconfigured = "not found" in str(e).lower()
         return {
             "success": False,
+            "configured": not is_unconfigured,
             "error": str(e)
         }
 
