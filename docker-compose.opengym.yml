@@ -1,0 +1,44 @@
+# OpenGym Docker Compose Stack
+# Access URL: http://localhost:8080 (or http://<your-host-ip>:8080)
+
+name: opengym
+
+services:
+  api:
+    image: ghcr.io/duartesantos8/opengym-api:latest
+    container_name: opengym-api
+    restart: unless-stopped
+    environment:
+      - PORT=3000
+      - DATA_DIR=/data
+      - TRUST_PROXY=1
+      # Enables username + password sign-in (essential for LAN access without HTTPS passkey requirements)
+      - PASSWORD_LOGIN=1
+      - FIRST_USER_ADMIN=1
+      - RP_ID=localhost
+      - ORIGIN=http://localhost:8080
+    volumes:
+      - opengym_data:/data
+      - opengym_coach:/coach-auth
+
+  web:
+    image: ghcr.io/duartesantos8/opengym-web:latest
+    container_name: opengym-web
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_started
+    ports:
+      - "8080:80"
+    environment:
+      - NGINX_PORT=80
+      - BACKEND=api
+      - PORT=3000
+      - RESOLVER=127.0.0.11
+      - BASE_PATH=
+
+volumes:
+  opengym_data:
+    driver: local
+  opengym_coach:
+    driver: local

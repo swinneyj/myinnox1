@@ -1,0 +1,6 @@
+{
+  "auto_power_on": true,
+  "auto_power_off": true,
+  "idle_timeout_no_workout_min": 15,
+  "idle_timeout_post_workout_min": 20
+}

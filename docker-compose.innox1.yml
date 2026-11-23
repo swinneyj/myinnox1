@@ -1,0 +1,16 @@
+# Self-Hosted Innodigym Web Client Docker Compose Stack
+# Access URL: http://localhost:8089 (or http://<your-host-ip>:8089)
+
+name: myinnox1
+
+services:
+  web:
+    image: nginx:alpine
+    container_name: myinnox1-web
+    restart: unless-stopped
+    ports:
+      - "8089:80"
+    volumes:
+      # Mount the static web assets & Nginx config
+      - ./myinnox1-local:/usr/share/nginx/html:ro
+      - ./myinnox1-local/nginx.conf:/etc/nginx/conf.d/default.conf:ro

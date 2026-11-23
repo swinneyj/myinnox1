@@ -1,0 +1,3 @@
+# Core server has zero mandatory external dependencies (uses standard library).
+# Optional dependencies:
+python-kasa>=0.7.0  # Optional: For Tapo / Kasa smart plug power management
