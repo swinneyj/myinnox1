@@ -79,7 +79,9 @@ def save_opengym_data(state, base_rev):
 
 def get_status():
     url, token = get_opengym_auth()
+    configured = os.path.exists(CONFIG_FILE) or os.path.exists(TOKEN_FILE)
     result = {
+        "configured": configured,
         "connected": False,
         "url": url,
         "routines_count": 0,

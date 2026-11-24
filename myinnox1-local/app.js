@@ -157,6 +157,16 @@ async function api(path, opts = {}) {
   } catch {
     body = null;
   }
+  const isLoginReq = cleanPath.startsWith("app/login");
+  if (!isLoginReq && (res.status === 401 || (body && body.code === 401))) {
+    store.remove(TOKEN_KEY);
+    window.INNO_TOKEN = "";
+    showLoggedOut();
+    toast(t("Session expired — please log in again."), true);
+    const err = new Error((body && body.msg) || "Session expired");
+    err.body = body;
+    throw err;
+  }
   if (!res.ok || (body && body.success === false)) {
     const msg = (body && (body.msg || body.proxyError)) || `HTTP ${res.status}`;
     const err = new Error(msg);
@@ -174,6 +184,18 @@ function escapeHtml(s) {
 
 let currentEmail = null;
 let activeTab = "programs";
+function showLoggedOut() {
+  $("login-section").hidden = false;
+  $("tabs").hidden = true;
+  $("main-section").hidden = true;
+  $("userbar").innerHTML = "";
+  currentEmail = null;
+  const autoBtn = $("auto-login-btn");
+  if (autoBtn) {
+    autoBtn.hidden = !(window.INNO_TOKEN || store.get(TOKEN_KEY));
+  }
+}
+
 function showLoggedIn(email) {
   $("login-section").hidden = true;
   $("tabs").hidden = false;
@@ -1356,7 +1378,7 @@ $("login-form").addEventListener("submit", async (e) => {
   try {
     if (!password && (window.INNO_TOKEN || store.get(TOKEN_KEY))) {
       const tok = window.INNO_TOKEN || store.get(TOKEN_KEY);
-      const em = email || window.INNO_EMAIL || "TheITGuru";
+      const em = email || window.INNO_EMAIL || "User";
       store.remove("innodigym_manual_logout");
       store.set(TOKEN_KEY, tok);
       store.set(EMAIL_KEY, em);
@@ -1380,7 +1402,7 @@ if (autoBtn) {
   autoBtn.addEventListener("click", () => {
     store.remove("innodigym_manual_logout");
     const tok = window.INNO_TOKEN || store.get(TOKEN_KEY);
-    const em = window.INNO_EMAIL || store.get(EMAIL_KEY) || "TheITGuru";
+    const em = window.INNO_EMAIL || store.get(EMAIL_KEY) || "User";
     if (tok) {
       store.set(TOKEN_KEY, tok);
       store.set(EMAIL_KEY, em);
@@ -1431,7 +1453,7 @@ try {
 
 (function init() {
   const token = store.get(TOKEN_KEY) || window.INNO_TOKEN;
-  const email = store.get(EMAIL_KEY) || window.INNO_EMAIL || "TheITGuru";
+  const email = store.get(EMAIL_KEY) || window.INNO_EMAIL || "User";
   if (token) {
     store.set(TOKEN_KEY, token);
     store.set(EMAIL_KEY, email);
@@ -1440,14 +1462,16 @@ try {
     switchTab("programs");
     return;
   }
+  showLoggedOut();
   fetch(getAppBase() + "token.json?t=" + Date.now())
-    .then((r) => r.json())
+    .then((r) => (r.ok ? r.json() : null))
     .then((d) => {
       if (d && d.token) {
+        const em = d.email || "User";
         store.set(TOKEN_KEY, d.token);
-        store.set(EMAIL_KEY, d.email || "TheITGuru");
+        store.set(EMAIL_KEY, em);
         try { Units.load(api); } catch (_) {}
-        showLoggedIn(d.email || "TheITGuru");
+        showLoggedIn(em);
         switchTab("programs");
       }
     })
@@ -1458,6 +1482,8 @@ try {
 // OpenGym Bridge Integration
 // ==========================================
 async function updateOpenGymStatus() {
+  const bar = $("opengym-bar");
+  const asOg = $("as-opengym");
   const ind = $("og-indicator");
   const txt = $("og-status-text");
   const badge = $("og-routines-badge");
@@ -1465,9 +1491,21 @@ async function updateOpenGymStatus() {
   if (!ind || !txt) return;
   try {
     const res = await fetch(getApiBase() + "/opengym/status");
+    if (!res.ok) {
+      if (bar) bar.hidden = true;
+      if (asOg) asOg.hidden = true;
+      return;
+    }
     const data = await res.json();
+    if (!data || data.configured === false) {
+      if (bar) bar.hidden = true;
+      if (asOg) asOg.hidden = true;
+      return;
+    }
+    if (bar) bar.hidden = false;
     if (data.url) window.openGymWebUrl = data.url;
     if (data.connected) {
+      if (asOg) asOg.hidden = false;
       ind.classList.remove("offline");
       txt.textContent = "Connected";
       badge.textContent = `${data.routines_count} routines in OpenGym`;
@@ -1492,16 +1530,15 @@ async function updateOpenGymStatus() {
         syncBadge.hidden = false;
       }
     } else {
+      if (asOg) asOg.hidden = true;
       ind.classList.add("offline");
       txt.textContent = "Disconnected";
       badge.textContent = data.error || "Offline";
       if (syncBadge) syncBadge.hidden = true;
     }
   } catch (err) {
-    ind.classList.add("offline");
-    txt.textContent = "Offline";
-    badge.textContent = "--";
-    if (syncBadge) syncBadge.hidden = true;
+    if (bar) bar.hidden = true;
+    if (asOg) asOg.hidden = true;
   }
 }
 

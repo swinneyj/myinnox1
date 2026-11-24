@@ -5,7 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#f4f6fb">
 <meta name="color-scheme" content="light dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="InnoStudio">
 <title>InnoStudio — X1 Pro Console</title>
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="favicon-32.png" type="image/png" sizes="32x32">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -138,7 +142,7 @@ if (window.location.pathname === "/gym") {
       <label>Email <input type="email" id="login-email" autocomplete="username"></label>
       <label>Password <input type="password" id="login-password" autocomplete="current-password"></label>
       <button type="submit">Log in</button>
-      <button type="button" id="auto-login-btn" style="margin-top: 10px; width: 100%; background: var(--primary, #0d9488); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer;">⚡ Connect with Saved Token</button>
+      <button type="button" id="auto-login-btn" hidden style="margin-top: 10px; width: 100%; background: var(--primary, #0d9488); color: #fff; border: none; padding: 12px; border-radius: 8px; font-weight: 600; cursor: pointer;">⚡ Connect with Saved Token</button>
     </form>
     <p id="login-error" class="error" hidden></p>
     <p class="hint">Credentials are sent through this site's proxy straight to power.renhesports.com. The proxy doesn't store or log them. Your session token stays in this browser's localStorage.</p>
@@ -618,9 +622,8 @@ if (window.location.pathname === "/gym") {
 <script src="activity-core.js?v=20261120"></script>
 <script src="version.js?v=20261120"></script>
 <script src="footer-version.js?v=20261120"></script>
-<script src="token.js?v=20261120"></script>
-<script src="app.js?v=20261120"></script>
-<script src="power-ui.js?v=20261120"></script>
+<script src="app.js?v=20261124"></script>
+<script src="power-ui.js?v=20261124"></script>
 <script src="program-io.js?v=20261120"></script>
 <script src="planner.js?v=20261120"></script>
 <script src="movements.js?v=20261120"></script>
